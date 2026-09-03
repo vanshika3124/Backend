@@ -8,9 +8,7 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: process.env.GMAIL_USER,
         pass: process.env.GMAIL_APP_PASSWORD
-    },
-
-    family: 4
+    }
 });
 
 export const sendEmail = async (to, subject, text, html) => {
