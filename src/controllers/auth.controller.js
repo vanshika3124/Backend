@@ -9,55 +9,95 @@ import otpModel from "../models/otp.model.js";
 
 export async function register(req, res) {
 
-
     const { username, email, password } = req.body;
 
-    const isAlreadyRegistered = await userModel.findOne({  
-        $or:[
-            {username},
-            {email}
-        ]
-     });
+    const existingUser = await userModel.findOne({ email });
 
-     if(isAlreadyRegistered){
-        return res.status(409).json({
-            message:"User already exists"
-        })
-     }
+    // Email already exists
+    if (existingUser) {
 
-     const hashedPassword = crypto.createHash("sha256").update(password).digest("hex");
+        // Already verified → cannot register again
+        if (existingUser.verified) {
+            return res.status(409).json({
+                message: "Email already registered"
+            });
+        }
 
-     const user = await userModel.create({
+        // Account exists but email is not verified
+        // Generate a new OTP
+        const otp = generateOtp();
+
+        const otpHash = crypto
+            .createHash("sha256")
+            .update(otp)
+            .digest("hex");
+
+        await otpModel.deleteMany({
+            user: existingUser._id
+        });
+
+        await otpModel.create({
+            email: existingUser.email,
+            user: existingUser._id,
+            otpHash
+        });
+
+        const html = getOtpHtml(otp);
+
+        await sendEmail(
+            existingUser.email,
+            "OTP Verification",
+            null,
+            html
+        );
+
+        return res.status(200).json({
+            message: "New OTP sent successfully"
+        });
+    }
+
+    // New user
+    const hashedPassword = crypto
+        .createHash("sha256")
+        .update(password)
+        .digest("hex");
+
+    const user = await userModel.create({
         username,
         email,
-        password:hashedPassword
-     })
+        password: hashedPassword
+    });
 
-     const otp = generateOtp();
-     const html = getOtpHtml(otp);
+    const otp = generateOtp();
 
-      
-     const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+    const otpHash = crypto
+        .createHash("sha256")
+        .update(otp)
+        .digest("hex");
 
-     await otpModel.create({
+    await otpModel.create({
         email,
         user: user._id,
         otpHash
-     });
-    
-     await sendEmail(email, "OTP Verification", null, html);
+    });
 
-    res.status(201).json({
-        message:"User registered successfully",
-        user:{
+    const html = getOtpHtml(otp);
+
+    await sendEmail(
+        email,
+        "OTP Verification",
+        null,
+        html
+    );
+
+    return res.status(201).json({
+        message: "User registered successfully",
+        user: {
             username: user.username,
             email: user.email,
             verified: user.verified
-        } 
-        
-    })
-
-
+        }
+    });
 }
 
 export async function login(req,res){
