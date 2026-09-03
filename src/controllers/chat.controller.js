@@ -56,11 +56,12 @@ if (conversation.title === "New Conversation") {
         await conversation.save();
 
         res.status(200).json({
-            success: true,
-            answer: result.answer,
-            userMessage,
-            assistantMessage
-        });
+    success: true,
+    answer: result.answer,
+    sources: result.sources || [],
+    userMessage,
+    assistantMessage
+});
 
     } catch (error) {
         console.error("Chat error:", error);
