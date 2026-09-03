@@ -16,9 +16,9 @@ export const sendEmail = async (to, subject, text, html) => {
                         email: to
                     }
                 ],
-                subject,
-                textContent: text || "",
-                htmlContent: html || ""
+                subject: subject,
+                textContent: text || "Your OTP is included in the email.",
+                htmlContent: html || `<p>${text || ""}</p>`
             },
             {
                 headers: {
