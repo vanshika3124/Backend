@@ -1,36 +1,24 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import config from "../config/config.js";
 
+const resend = new Resend(config.RESEND_API_KEY);
 
-const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: {
-        type: 'OAuth2',
-        user: config.GOOGLE_USER,
-        clientId: config.GOOGLE_CLIENT_ID,
-        clientSecret: config.GOOGLE_CLIENT_SECRET,
-        refreshToken: config.GOOGLE_REFRESH_TOKEN
-    }
-});
-
-transporter.verify((error, success) => {
-    if (error) {
-        console.error("Error verifying email transporter:", error);
-    } else {
-        console.log("Email transporter verified successfully.");
-    }
-});
-
-export const sendEmail = async (to, subject, text , html) => {
+export const sendEmail = async (to, subject, text, html) => {
     try {
-        const info = await transporter.sendMail({
-            from: `"Your Name" <${config.GOOGLE_USER}>`,
+        const { data, error } = await resend.emails.send({
+            from: "BIS Assistant <onboarding@resend.dev>",
             to,
             subject,
             text,
             html
         });
-        console.log("Email sent successfully:", info.messageId);
+
+        if (error) {
+            console.error("Error sending email:", error);
+            throw new Error(error.message);
+        }
+
+        console.log("Email sent successfully:", data);
     } catch (error) {
         console.error("Error sending email:", error);
         throw error;
