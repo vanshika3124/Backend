@@ -1,11 +1,14 @@
 import axios from "axios";
 
-const ML_API_URL = "https://sih2026-prototype.onrender.com/chat";
+const ML_API_URL = process.env.ML_API_URL;
 
 export async function askML(question) {
     try {
-        const response = await axios.post(
-            ML_API_URL,
+        console.log("ML URL:", ML_API_URL);
+        console.log("Sending question:", question);
+
+        const { data } = await axios.post(
+            `${ML_API_URL}/chat`,
             {
                 question
             },
@@ -17,16 +20,17 @@ export async function askML(question) {
             }
         );
 
-        return {
-            answer: response.data.answer,
-            sources: response.data.sources || []
-        };
+        console.log("ML RESPONSE:", data);
+
+        return data;
 
     } catch (error) {
-        console.error(
-            "ML API error:",
-            error.response?.data || error.message
-        );
+        console.error("========== ML ERROR ==========");
+        console.error("Status:", error.response?.status);
+        console.error("Data:", error.response?.data);
+        console.error("Message:", error.message);
+        console.error("URL:", `${ML_API_URL}/chat`);
+        console.error("================================");
 
         throw new Error("ML service failed");
     }
