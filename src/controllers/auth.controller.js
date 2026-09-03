@@ -271,39 +271,76 @@ export async function logoutAll(req,res){
 
 }
 
-export async function verifyEmail(req,res){
-    const { otp, email } = req.body;
+export async function verifyEmail(req, res) {
+    try {
+        // Support both:
+        // POST -> req.body
+        // GET  -> req.query
 
-    const otpHash = crypto.createHash("sha256").update(otp).digest("hex");
+        const email = req.body?.email || req.query?.email;
+        const otp = req.body?.otp || req.query?.otp;
 
-    const otpDoc = await otpModel.findOne({
-        email,
-        otpHash
-    })
+        if (!email || !otp) {
+            return res.status(400).json({
+                success: false,
+                message: "Email and OTP are required"
+            });
+        }
 
-    if(!otpDoc){
-        return res.status(400).json({
-            message: "Invalid OTP"
-        })
-    }
+        const otpHash = crypto
+            .createHash("sha256")
+            .update(String(otp))
+            .digest("hex");
 
-    const user = await userModel.findByIdAndUpdate(otpDoc.user, {
-         verified: true
-         },
-        {
-         new: true
+        const otpDoc = await otpModel.findOne({
+            email,
+            otpHash
         });
 
-    await otpModel.deleteMany({
-        user: otpDoc.user
-    })
-
-    res.status(200).json({
-        message: "Email verified successfully",
-        user:{
-            username: user.username,
-            email: user.email,
-            verified: user.verified
+        if (!otpDoc) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired OTP"
+            });
         }
-    })
+
+        const user = await userModel.findByIdAndUpdate(
+            otpDoc.user,
+            {
+                verified: true
+            },
+            {
+                new: true
+            }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        await otpModel.deleteMany({
+            user: otpDoc.user
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Email verified successfully",
+            user: {
+                username: user.username,
+                email: user.email,
+                verified: user.verified
+            }
+        });
+
+    } catch (error) {
+        console.error("Verify email error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to verify email"
+        });
+    }
 }
