@@ -24,14 +24,14 @@ export async function askML(question) {
 
         return data;
 
-    } catch (error) {
-        console.error("========== ML ERROR ==========");
-        console.error("Status:", error.response?.status);
-        console.error("Data:", error.response?.data);
-        console.error("Message:", error.message);
-        console.error("URL:", `${ML_API_URL}/chat`);
-        console.error("================================");
+    }  catch (error) {
+    console.error("========== ML ERROR ==========");
+    console.error("Status:", error.response?.status);
+    console.error("Data:", error.response?.data);
+    console.error("Message:", error.message);
+    console.error("URL:", `${ML_API_URL}/chat`);
+    console.error("================================");
 
-        throw new Error("ML service failed");
-    }
+    throw error;
+}
 }
