@@ -8,17 +8,15 @@ export async function askML(question) {
         console.log("Sending question:", question);
 
         const { data } = await axios.post(
-            `${ML_API_URL}/chat`,
-            {
-                question
-            },
-            {
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                timeout: 60000
-            }
-        );
+    `${ML_API_URL}/chat`,
+    { question },
+    {
+        headers: {
+            "Content-Type": "application/json"
+        },
+        timeout: 90000
+    }
+);
 
         console.log("ML RESPONSE:", data);
 
