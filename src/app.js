@@ -16,6 +16,7 @@ app.use(
     origin: [
       "http://localhost:5173",
       "https://bis-sahayaak.netlify.app",
+      "https://bis-sahayak-gamma.vercel.app"
     ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
