@@ -223,11 +223,16 @@ export async function refreshToken(req,res){
         })
     }
 
-    const accessToken = jwt.sign({
-        id: decoded.id
-    }, config.JWT_SECRET, {
-        expiresIn: "15m"
-    })
+    const accessToken = jwt.sign(
+  {
+    id: decoded.id,
+    sessionId: session._id
+  },
+  config.JWT_SECRET,
+  {
+    expiresIn: "15m"
+  }
+);
 
     const newrefreshToken = jwt.sign({
         id: decoded.id
