@@ -153,12 +153,12 @@ export async function login(req,res){
      })
 
      
-     res.cookie("refreshToken", refreshToken,{
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 7*24*60*60*1000
-     })
+     res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+});
     
     res.status(200).json({
         message:"User logged in successfully",
@@ -242,12 +242,12 @@ const newRefreshTokenHash = crypto.createHash("sha256").update(newrefreshToken).
 session.refreshTokenHash = newRefreshTokenHash;
 await session.save();
 
-    res.cookie("refreshToken", newrefreshToken,{
-        httpOnly: true,
-        secure: true,
-        sameSite:"strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000
-    })
+    res.cookie("refreshToken", newrefreshToken, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 7 * 24 * 60 * 60 * 1000
+});
 
     res.status(200).json({
         message: "Access Token Refreshed successfully",
