@@ -28,6 +28,13 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use(cookieParser());
 
+// ==================== HEALTH CHECK ====================
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    status: "ok",
+  });
+});
+
 // ==================== ROUTES ====================
 app.use("/api/conversations", conversationRouter);
 app.use("/api/auth", authRouter);
